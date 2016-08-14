@@ -12,11 +12,12 @@ var uglify = require('gulp-uglify');
 var vinylSource = require('vinyl-source-stream');
 var buffer      = require('vinyl-buffer');
 var gulpif      = require('gulp-if');
+var pump = require('pump');
 
 var yargs       = require('yargs');
 
 var babelify    = require('babelify');
-var pump = require('pump');
+
 
 
 require('shelljs/global');
@@ -84,7 +85,7 @@ gulp.task('initialize', function(cb) {
 
 
 var browserifyOption = {
-    entries: [ './src/js/index.js' ],
+    entries: [  './src/js/index.js' ],
     debug: (buildTarget === 'development')
 };
 var babalifyConf = {
@@ -93,7 +94,6 @@ var babalifyConf = {
 };
 
 gulp.task('js', function(cb) {
-
     // browserify(browserifyOption)
     // .transform(babelify, {presets: ["es2015", "react"]} )
     // .bundle()
@@ -118,7 +118,7 @@ gulp.task('js', function(cb) {
         uglify(),
         sourcemaps.write('./'),
         gulp.dest(buildDir)
-    ], cb)
+    ], cb);
 });
 
 gulp.task('next1', ['initialize'], function(cb) {
