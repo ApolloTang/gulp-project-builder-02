@@ -11,7 +11,6 @@ var uglify = require('gulp-uglify');
 
 var vinylSource = require('vinyl-source-stream');
 var buffer      = require('vinyl-buffer');
-var gutil       = require('gulp-util');
 var gulpif      = require('gulp-if');
 
 var yargs       = require('yargs');
@@ -88,7 +87,12 @@ var browserifyOption = {
     entries: [ './src/js/index.js' ],
     debug: (buildTarget === 'development')
 };
-gulp.task('js', function() {
+var babalifyConf = {
+    presets: ["es2015", "react"],
+    "plugins": ["transform-object-rest-spread"]
+};
+
+gulp.task('js', function(cb) {
 
     // browserify(browserifyOption)
     // .transform(babelify, {presets: ["es2015", "react"]} )
@@ -103,9 +107,8 @@ gulp.task('js', function() {
     // // .pipe(connect.reload());
 
     var b  = browserify(browserifyOption)
-        .transform(babelify, {presets: ["es2015", "react"]} )
+        .transform(babelify.configure(babalifyConf))
         .bundle()
-        .on('error', gutil.log.bind(gutil, 'Browserify Error'))
         .pipe(vinylSource('bundle.js'));
 
     pump([
@@ -115,7 +118,7 @@ gulp.task('js', function() {
         uglify(),
         sourcemaps.write('./'),
         gulp.dest(buildDir)
-    ])
+    ], cb)
 });
 
 gulp.task('next1', ['initialize'], function(cb) {
