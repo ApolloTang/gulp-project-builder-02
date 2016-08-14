@@ -2,14 +2,22 @@
 'use strict';
 
 var gulp = require('gulp');
-var browserify = require('browserify');
-var connect = require('gulp-connect');
+var browserify  = require('browserify');
+
+var connect     = require('gulp-connect');
+
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+
 var vinylSource = require('vinyl-source-stream');
+var buffer      = require('vinyl-buffer');
+var gutil       = require('gulp-util');
+var gulpif      = require('gulp-if');
 
-var yargs = require('yargs');
+var yargs       = require('yargs');
 
+var babelify    = require('babelify');
 
-var babelify = require('babelify');
 
 
 require('shelljs/global');
@@ -39,10 +47,12 @@ var argv = yargs
     })
     .help('help')
     .argv;
-
 var buildTarget = argv.target;
 var serverPort = argv.serverport;
 var livereloadPort = argv.livereloadport;
+
+
+
 
 gulp.task('initialize', function(cb) {
     var err = null;
@@ -74,6 +84,24 @@ gulp.task('initialize', function(cb) {
 });
 
 
+var browserifyOption = {
+    entries: [ './src/js/index.js' ],
+    debug: (buildTarget === 'development')
+};
+gulp.task('js', function() {
+    browserify(browserifyOption)
+    .transform(babelify, {presets: ["es2015", "react"]} )
+    .bundle()
+    .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+    .pipe(vinylSource('bundle.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(buildDir))
+    // .pipe(connect.reload());
+});
+
 gulp.task('next1', ['initialize'], function(cb) {
     console.log('next running' );
 });
@@ -82,6 +110,6 @@ gulp.task('next2', ['initialize'], function(cb) {
     console.log('next running' );
 });
 
-gulp.task('default', ['initialize', 'next1', 'next2'], function(){
+gulp.task('default', ['initialize', 'next1', 'next2', 'js'], function(){
     console.log('all done');
 });
