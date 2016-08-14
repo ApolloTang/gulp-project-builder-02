@@ -6,8 +6,11 @@ import newName from  './module-file-a';
 // fn_a();
 // console.log(var_a_newName);
 // console.log(typeof newName);
-const a=() =>{
+const a=() >=>{
     const b = {a:'a'}
     const c = {...a};
     console.log('hello');
+    console.log('bye');
 }
+
+a();

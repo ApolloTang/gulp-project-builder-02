@@ -38,12 +38,12 @@ var argv = yargs
     .option('serverport', {
         alias: 's',
         describe: 'server port',
-        default: 3212
+        default: 7777
     })
     .option('livereloadport', {
         alias: 'l',
         describe: 'livereload port',
-        default: 40000
+        default: 47777
     })
     .help('help')
     .argv;
@@ -117,18 +117,30 @@ gulp.task('js', function(cb) {
         sourcemaps.init({loadMaps: true}),
         uglify(),
         sourcemaps.write('./'),
-        gulp.dest(buildDir)
+        gulp.dest(buildDir),
+        connect.reload()
     ], cb);
 });
 
-gulp.task('next1', ['initialize'], function(cb) {
-    console.log('next running' );
+
+gulp.task('watch', ['initialize'], function(){
+    // gulp.watch('src/templates/**/*.jade', ['jade']);
+    gulp.watch('src/js/**/*.js', ['js']);
+    // gulp.watch('src/sass/**/*.scss', ['sass']);
+    // gulp.watch('src/less/**/*.less', ['less']);
+    // gulp.watch('src/statics/**/*', ['onStaticFolderChange']);
 });
 
-gulp.task('next2', ['initialize'], function(cb) {
-    console.log('next running' );
+gulp.task('connect', ['initialize'], function(){
+    connect.server({
+        root: buildDir,
+        // open: { browser: 'Google Chrome'}
+        // Option open does not work in gulp-connect v 2.*. Please read "readme" https://github.com/AveVlad/gulp-connect}
+        port: serverPort,
+        livereload: {port : livereloadPort}
+    });
 });
 
-gulp.task('default', ['initialize', 'next1', 'next2', 'js'], function(){
+gulp.task('default', ['initialize',  'js', 'watch',  'connect'], function(){
     console.log('all done');
 });
