@@ -17,7 +17,7 @@ var gulpif      = require('gulp-if');
 var yargs       = require('yargs');
 
 var babelify    = require('babelify');
-
+var pump = require('pump');
 
 
 require('shelljs/global');
@@ -89,17 +89,33 @@ var browserifyOption = {
     debug: (buildTarget === 'development')
 };
 gulp.task('js', function() {
-    browserify(browserifyOption)
-    .transform(babelify, {presets: ["es2015", "react"]} )
-    .bundle()
-    .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-    .pipe(vinylSource('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(buildDir))
-    // .pipe(connect.reload());
+
+    // browserify(browserifyOption)
+    // .transform(babelify, {presets: ["es2015", "react"]} )
+    // .bundle()
+    // .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+    // .pipe(vinylSource('bundle.js'))
+    // .pipe(buffer())
+    // .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+    // .pipe(uglify())
+    // .pipe(sourcemaps.write('./'))
+    // .pipe(gulp.dest(buildDir))
+    // // .pipe(connect.reload());
+
+    var b  = browserify(browserifyOption)
+        .transform(babelify, {presets: ["es2015", "react"]} )
+        .bundle()
+        .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+        .pipe(vinylSource('bundle.js'));
+
+    pump([
+        b,
+        buffer(),
+        sourcemaps.init({loadMaps: true}),
+        uglify(),
+        sourcemaps.write('./'),
+        gulp.dest(buildDir)
+    ])
 });
 
 gulp.task('next1', ['initialize'], function(cb) {
