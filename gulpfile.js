@@ -12,7 +12,8 @@ var gulpif      = require('gulp-if');
 var pump        = require('pump');
 var yargs       = require('yargs');
 var babelify    = require('babelify');
-
+var less        = require('gulp-less');
+var rename      = require('gulp-rename');
 var errorify    = require('errorify');
 
 require('shelljs/global');
@@ -107,14 +108,23 @@ gulp.task('js', function(cb) {
     ], cb);
 });
 
+gulp.task('less', ['initialize'],  function(){
+    var config = {};
+    return gulp.src('./src/less/index.less')
+    .pipe( sourcemaps.init())
+    .pipe(less())
+    .on('error', onError)
+    .pipe(sourcemaps.write())
+    .pipe(rename('style.css'))
+    .pipe(gulp.dest(buildDir))
+    .pipe(connect.reload());
+});
+
 
 gulp.task('watch', ['initialize'], function(){
     console.log('watch fired...')
-    // gulp.watch('src/templates/**/*.jade', ['jade']);
     gulp.watch('src/js/**/*.js', ['js']);
-    // gulp.watch('src/sass/**/*.scss', ['sass']);
-    // gulp.watch('src/less/**/*.less', ['less']);
-    // gulp.watch('src/statics/**/*', ['onStaticFolderChange']);
+    gulp.watch('src/less/**/*.less', ['less']);
 });
 
 gulp.task('connect', ['initialize'], function(){
@@ -127,8 +137,8 @@ gulp.task('connect', ['initialize'], function(){
     });
 });
 
-gulp.task('default', ['initialize',  'js', 'watch',  'connect'], function(){
-    console.log('all done');
+gulp.task('default', ['initialize',  'js', 'less', 'watch',  'connect'], function(){
+    console.log('All done');
 });
 
 
