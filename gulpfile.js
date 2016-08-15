@@ -13,6 +13,7 @@ var pump        = require('pump');
 var yargs       = require('yargs');
 var babelify    = require('babelify');
 
+var errorify    = require('errorify');
 
 require('shelljs/global');
 config.fatal = true;
@@ -89,9 +90,10 @@ gulp.task('js', function(cb) {
     };
 
     var b  = browserify(browserifyOption)
+        .plugin(errorify, function(err){console.log(err)})
         .transform(babelify.configure(babalifyConf))
         .bundle()
-        .on('error', onError)
+        // .on('error', onError)  // This is nolonger necessary because of errorify
         .pipe(vinylSource('bundle.js'))
 
     pump([
@@ -131,7 +133,7 @@ gulp.task('default', ['initialize',  'js', 'watch',  'connect'], function(){
 
 
 function onError(err) {
-  console.log(err.toString());
-  console.log(err.codeFrame);
-  this.emit('end');
+    console.log('ERROR: ', err.toString());
+    console.log('ERROR: ', err.codeFrame);
+    this.emit('end');
 }
