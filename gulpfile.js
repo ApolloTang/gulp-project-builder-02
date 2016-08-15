@@ -101,25 +101,8 @@ var babalifyConf = {
     "plugins": ["transform-object-rest-spread"]
 };
 
-function onError(err) {
-  console.log(err.codeFrame);
-  this.emit('end');
-}
 
 gulp.task('js', function(cb) {
-    // browserify(browserifyOption)
-    // .plugin(errorify)
-    // .transform(babelify.configure(babalifyConf))
-    // .bundle()
-    // .on('error', onError)
-    // .pipe(vinylSource('bundle.js'))
-    // .pipe(buffer())
-    // .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-    // .pipe(uglify())
-    // .pipe(sourcemaps.write('./')) // writes .map file
-    // .pipe(gulp.dest(buildDir))
-    // .pipe(connect.reload());
-
     var b  = browserify(browserifyOption)
         // .plugin(errorify)
         .transform(babelify.configure(babalifyConf))
@@ -136,7 +119,6 @@ gulp.task('js', function(cb) {
         gulp.dest(buildDir),
         connect.reload()
     ], cb);
-
 });
 
 
@@ -162,3 +144,10 @@ gulp.task('connect', ['initialize'], function(){
 gulp.task('default', ['initialize',  'js', 'watch',  'connect'], function(){
     console.log('all done');
 });
+
+
+function onError(err) {
+  console.log(err.toString());
+  console.log(err.codeFrame);
+  this.emit('end');
+}
