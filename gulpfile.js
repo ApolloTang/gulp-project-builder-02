@@ -108,16 +108,16 @@ gulp.task('js', function(cb) {
     ], cb);
 });
 
-gulp.task('less', ['initialize'],  function(){
-    var config = {};
-    return gulp.src('./src/less/index.less')
-    .pipe( sourcemaps.init())
-    .pipe(less())
-    .on('error', onError)
-    .pipe(sourcemaps.write())
-    .pipe(rename('style.css'))
-    .pipe(gulp.dest(buildDir))
-    .pipe(connect.reload());
+gulp.task('less', ['initialize'],  function(cb){
+    pump([
+        gulp.src('./src/less/index.less'),
+        sourcemaps.init(),
+        less(),
+        sourcemaps.write(),
+        rename('style.css'),
+        gulp.dest(buildDir),
+        connect.reload()
+    ], cb)
 });
 
 
