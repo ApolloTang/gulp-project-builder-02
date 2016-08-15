@@ -10,7 +10,7 @@ const a=() =>{
     const b = {a:'a'}
     const c = {...a};
     console.log('hello');
-    console.log('byebuildDirsxx', c);
+    console.log('byebuildDir', c);
 }
 
 a();

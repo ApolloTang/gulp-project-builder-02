@@ -1,31 +1,17 @@
 /* global */
 'use strict';
 
-var gulp = require('gulp');
+var gulp        = require('gulp');
 var browserify  = require('browserify');
-
 var connect     = require('gulp-connect');
-
-var sourcemaps = require('gulp-sourcemaps');
-var uglify = require('gulp-uglify');
-
+var sourcemaps  = require('gulp-sourcemaps');
+var uglify      = require('gulp-uglify');
 var vinylSource = require('vinyl-source-stream');
 var buffer      = require('vinyl-buffer');
 var gulpif      = require('gulp-if');
-var pump = require('pump');
-
-var plumber = require('gulp-plumber');
-
+var pump        = require('pump');
 var yargs       = require('yargs');
-
 var babelify    = require('babelify');
-
-var errorify    = require('errorify');
-
-var gutil = require('gulp-util');
-
-var streamify = require('gulp-streamify');
-
 
 
 require('shelljs/global');
@@ -92,19 +78,17 @@ gulp.task('initialize', function(cb) {
 });
 
 
-var browserifyOption = {
-    entries: [  './src/js/index.js' ],
-    debug: (buildTarget === 'development')
-};
-var babalifyConf = {
-    presets: ["es2015", "react"],
-    "plugins": ["transform-object-rest-spread"]
-};
-
-
 gulp.task('js', function(cb) {
+    var browserifyOption = {
+        entries: [  './src/js/index.js' ],
+        debug: (buildTarget === 'development')
+    };
+    var babalifyConf = {
+        presets: ["es2015", "react"],
+        "plugins": ["transform-object-rest-spread"]
+    };
+
     var b  = browserify(browserifyOption)
-        // .plugin(errorify)
         .transform(babelify.configure(babalifyConf))
         .bundle()
         .on('error', onError)
