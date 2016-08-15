@@ -20,6 +20,7 @@ var yargs       = require('yargs');
 
 var babelify    = require('babelify');
 
+var errorify    = require('errorify');
 
 var gutil = require('gulp-util');
 
@@ -105,66 +106,37 @@ function onError(err) {
   this.emit('end');
 }
 
-gulp.task('js', function() {
-    browserify(browserifyOption)
-    .transform(babelify.configure(babalifyConf))
-    .bundle()
-    .on('error', onError)
-    .pipe(vinylSource('bundle.js'))
-    .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./')) // writes .map file
-    .pipe(gulp.dest(buildDir))
-    .pipe(connect.reload());
-});
-
-gulp.task('jsxxxx', function(cb) {
+gulp.task('js', function(cb) {
     // browserify(browserifyOption)
-    // .transform(babelify, {presets: ["es2015", "react"]} )
+    // .plugin(errorify)
+    // .transform(babelify.configure(babalifyConf))
     // .bundle()
-    //
-    // .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+    // .on('error', onError)
     // .pipe(vinylSource('bundle.js'))
     // .pipe(buffer())
     // .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
     // .pipe(uglify())
-    // .pipe(sourcemaps.write('./'))
+    // .pipe(sourcemaps.write('./')) // writes .map file
     // .pipe(gulp.dest(buildDir))
-    // // .pipe(connect.reload());
+    // .pipe(connect.reload());
 
+    var b  = browserify(browserifyOption)
+        // .plugin(errorify)
+        .transform(babelify.configure(babalifyConf))
+        .bundle()
+        .on('error', onError)
+        .pipe(vinylSource('bundle.js'))
 
+    pump([
+        b,
+        buffer(),
+        sourcemaps.init({loadMaps: true}),
+        uglify(),
+        sourcemaps.write('./'),
+        gulp.dest(buildDir),
+        connect.reload()
+    ], cb);
 
-    browserify(browserifyOption)
-    .transform(babelify.configure(babalifyConf))
-    .bundle()
-    .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-    .pipe(vinylSource('bundle.js'))
-    .pipe(gulp.dest(buildDir))
-    .pipe(connect.reload());
-    // .pipe(plumber({ errorHandler: handlePlumberError }));
-    // .pipe(buffer())
-    // .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
-    // .pipe(uglify())
-    // // .pipe(streamify(uglify()))
-    // .pipe(sourcemaps.write('./'))
-
-
-    // var b  = browserify(browserifyOption)
-    //     .transform(babelify.configure(babalifyConf))
-    //     .bundle()
-    //     // .on('error', gutil.log.bind(gutil, 'Browserify Error'))
-    //     .pipe(vinylSource('bundle.js'))
-    //     // .pipe(plumber({ errorHandler: handlePlumberError }));
-    // pump([
-    //     b,
-    //     buffer(),
-    //     sourcemaps.init({loadMaps: true}),
-    //     uglify(),
-    //     sourcemaps.write('./'),
-    //     gulp.dest(buildDir),
-    //     connect.reload()
-    // ], cb);
 });
 
 
