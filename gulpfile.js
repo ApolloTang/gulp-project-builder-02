@@ -14,9 +14,16 @@ var buffer      = require('vinyl-buffer');
 var gulpif      = require('gulp-if');
 var pump = require('pump');
 
+var plumber = require('gulp-plumber');
+
 var yargs       = require('yargs');
 
 var babelify    = require('babelify');
+
+
+var gutil = require('gulp-util');
+
+var streamify = require('gulp-streamify');
 
 
 
@@ -93,10 +100,30 @@ var babalifyConf = {
     "plugins": ["transform-object-rest-spread"]
 };
 
-gulp.task('js', function(cb) {
+function onError(err) {
+  console.log(err.codeFrame);
+  this.emit('end');
+}
+
+gulp.task('js', function() {
+    browserify(browserifyOption)
+    .transform(babelify.configure(babalifyConf))
+    .bundle()
+    .on('error', onError)
+    .pipe(vinylSource('bundle.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./')) // writes .map file
+    .pipe(gulp.dest(buildDir))
+    .pipe(connect.reload());
+});
+
+gulp.task('jsxxxx', function(cb) {
     // browserify(browserifyOption)
     // .transform(babelify, {presets: ["es2015", "react"]} )
     // .bundle()
+    //
     // .on('error', gutil.log.bind(gutil, 'Browserify Error'))
     // .pipe(vinylSource('bundle.js'))
     // .pipe(buffer())
@@ -106,24 +133,43 @@ gulp.task('js', function(cb) {
     // .pipe(gulp.dest(buildDir))
     // // .pipe(connect.reload());
 
-    var b  = browserify(browserifyOption)
-        .transform(babelify.configure(babalifyConf))
-        .bundle()
-        .pipe(vinylSource('bundle.js'));
 
-    pump([
-        b,
-        buffer(),
-        sourcemaps.init({loadMaps: true}),
-        uglify(),
-        sourcemaps.write('./'),
-        gulp.dest(buildDir),
-        connect.reload()
-    ], cb);
+
+    browserify(browserifyOption)
+    .transform(babelify.configure(babalifyConf))
+    .bundle()
+    .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+    .pipe(vinylSource('bundle.js'))
+    .pipe(gulp.dest(buildDir))
+    .pipe(connect.reload());
+    // .pipe(plumber({ errorHandler: handlePlumberError }));
+    // .pipe(buffer())
+    // .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+    // .pipe(uglify())
+    // // .pipe(streamify(uglify()))
+    // .pipe(sourcemaps.write('./'))
+
+
+    // var b  = browserify(browserifyOption)
+    //     .transform(babelify.configure(babalifyConf))
+    //     .bundle()
+    //     // .on('error', gutil.log.bind(gutil, 'Browserify Error'))
+    //     .pipe(vinylSource('bundle.js'))
+    //     // .pipe(plumber({ errorHandler: handlePlumberError }));
+    // pump([
+    //     b,
+    //     buffer(),
+    //     sourcemaps.init({loadMaps: true}),
+    //     uglify(),
+    //     sourcemaps.write('./'),
+    //     gulp.dest(buildDir),
+    //     connect.reload()
+    // ], cb);
 });
 
 
 gulp.task('watch', ['initialize'], function(){
+    console.log('watch fired...')
     // gulp.watch('src/templates/**/*.jade', ['jade']);
     gulp.watch('src/js/**/*.js', ['js']);
     // gulp.watch('src/sass/**/*.scss', ['sass']);
