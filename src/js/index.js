@@ -8,9 +8,9 @@ import newName from  './module-file-a';
 // console.log(typeof newName);
 const a=() =>{
     const b = {a:'a'}
-    const c = {...a};
+    const c = {...b};
     console.log('hello');
-    console.log('byebuildDir', c);
+    console.log('xxxrbyebuildDir', c);
 }
 
 a();
