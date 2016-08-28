@@ -1,21 +1,23 @@
 /* global */
 'use strict';
 
-var gulp        = require('gulp');
-var browserify  = require('browserify');
-var connect     = require('gulp-connect');
-var sourcemaps  = require('gulp-sourcemaps');
-var uglify      = require('gulp-uglify');
-var vinylSource = require('vinyl-source-stream');
-var buffer      = require('vinyl-buffer');
-var gulpif      = require('gulp-if');
-var pump        = require('pump');
-var yargs       = require('yargs');
-var babelify    = require('babelify');
-var less        = require('gulp-less');
-var rename      = require('gulp-rename');
-var errorify    = require('errorify');
+var gulp               = require('gulp');
+var browserify         = require('browserify');
+var connect            = require('gulp-connect');
+var sourcemaps         = require('gulp-sourcemaps');
+var uglify             = require('gulp-uglify');
+var vinylSource        = require('vinyl-source-stream');
+var buffer             = require('vinyl-buffer');
+var gulpif             = require('gulp-if');
+var pump               = require('pump');
+var yargs              = require('yargs');
+var babelify           = require('babelify');
+var less               = require('gulp-less');
+var rename             = require('gulp-rename');
+var errorify           = require('errorify');
+var historyApiFallback = require('connect-history-api-fallback');
 
+// shelljs import and configuration
 require('shelljs/global');
 config.fatal = true;
 
@@ -23,6 +25,7 @@ config.fatal = true;
 // ----------------------- //
 
 var buildDir = 'builds/';
+var debugMode = true;
 
 var argv = yargs
     .option('target', {
@@ -94,7 +97,7 @@ gulp.task('js', function(cb) {
         .plugin(errorify, function(err){console.log(err)})
         .transform(babelify.configure(babalifyConf))
         .bundle()
-        // .on('error', onError)  // This is nolonger necessary because of errorify
+        // .on('error', onError)  // This is nolonger necessary because we are now using errorify
         .pipe(vinylSource('bundle.js'))
 
     pump([
@@ -128,12 +131,23 @@ gulp.task('watch', ['initialize'], function(){
 });
 
 gulp.task('connect', ['initialize'], function(){
+    const conf_historyApiFallback = {
+        verbose: debugMode,
+        rewrites: [{
+            from: /\/[^.]*$/,
+            to: function(context) {
+                // console.log('****** context: ', context);
+                return '/index.html';
+            }
+        }],
+        disableDotRule: false
+    };
     connect.server({
         root: buildDir,
-        // open: { browser: 'Google Chrome'}
-        // Option open does not work in gulp-connect v 2.*. Please read "readme" https://github.com/AveVlad/gulp-connect}
+        // open: { browser: 'Google Chrome'} // Option open does not work in gulp-connect v 2.*. Please read "readme" https://github.com/AveVlad/gulp-connect}
         port: serverPort,
-        livereload: {port : livereloadPort}
+        livereload: {port : livereloadPort},
+        middleware: function(connect, opt) { return [ historyApiFallback(conf_historyApiFallback)]; }
     });
 });
 
