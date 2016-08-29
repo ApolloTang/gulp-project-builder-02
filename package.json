@@ -21,6 +21,7 @@
     "errorify": "^0.3.1",
     "gulp": "^3.9.1",
     "gulp-buffer": "0.0.2",
+    "gulp-clean-css": "^2.0.12",
     "gulp-connect": "^5.0.0",
     "gulp-if": "^2.0.1",
     "gulp-less": "^3.1.0",

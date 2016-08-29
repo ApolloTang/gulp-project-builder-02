@@ -6,6 +6,7 @@ var browserify         = require('browserify');
 var connect            = require('gulp-connect');
 var sourcemaps         = require('gulp-sourcemaps');
 var uglify             = require('gulp-uglify');
+var cleanCSS           = require('gulp-clean-css');
 var vinylSource        = require('vinyl-source-stream');
 var buffer             = require('vinyl-buffer');
 var gulpif             = require('gulp-if');
@@ -17,6 +18,7 @@ var rename             = require('gulp-rename');
 var errorify           = require('errorify');
 var historyApiFallback = require('connect-history-api-fallback');
 
+
 // shelljs import and configuration
 require('shelljs/global');
 config.fatal = true;
@@ -25,7 +27,6 @@ config.fatal = true;
 // ----------------------- //
 
 var buildDir = 'builds/';
-var debugMode = true;
 
 var argv = yargs
     .option('target', {
@@ -51,6 +52,7 @@ var serverPort = argv.serverport;
 var livereloadPort = argv.livereloadport;
 
 
+var debugMode = true;
 
 
 gulp.task('initialize', function(cb) {
@@ -103,21 +105,29 @@ gulp.task('js', function(cb) {
     pump([
         b,
         buffer(),
-        sourcemaps.init({loadMaps: true}),
+        sourcemaps.init({loadMaps: (buildTarget === 'development')}),
         uglify(),
-        sourcemaps.write('./'),
+        gulpif( (buildTarget === 'development'), sourcemaps.write('./')),
         gulp.dest(buildDir),
         connect.reload()
     ], cb);
 });
 
-gulp.task('less', ['initialize'],  function(cb){
+gulp.task('less', function(cb){
+    // clean configuration
+    var conf_cleanCSS = { debug: true, sourceMap: true};
+    var cb_cleanCSS = function(details) {
+            console.log('css original size: ', details.name + ': ' + details.stats.originalSize);
+            console.log('css minified size: ', details.name + ': ' + details.stats.minifiedSize);
+    };
+
     pump([
         gulp.src('./src/less/index.less'),
-        sourcemaps.init(),
+        sourcemaps.init({loadMaps: true}),
         less(),
-        sourcemaps.write(),
         rename('style.css'),
+        cleanCSS(conf_cleanCSS, cb_cleanCSS),
+        gulpif( (buildTarget === 'development'), sourcemaps.write('./')),
         gulp.dest(buildDir),
         connect.reload()
     ], cb)
