@@ -17,5 +17,3 @@
     var var_b;
     export default var_b = {a:'module-filea -> default var_b'};
 
-    export default function fn_b() { }
-
